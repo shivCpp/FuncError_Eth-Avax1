@@ -1,95 +1,79 @@
-# SchoolGrading Smart Contract
-
-The `SchoolGrading` smart contract is designed to manage student grades in a decentralized manner using the Ethereum blockchain. This contract allows the submission, approval, and rejection of grades for students, ensuring that grades are handled securely and transparently.
+# Error 
 
 ## Overview
 
-The `SchoolGrading` smart contract includes the following features:
-- Submission of grades for students in specific subjects.
-- Approval and rejection of submitted grades.
-- Events emitted upon approval or rejection of grades.
+This program is a simple contract written in Solidity, a programming language used for developing smart contracts on the Ethereum blockchain. This `error` demonstrates the use of require, assert, and revert for error handling in Solidity contracts.This contract includes a function for minting token and transferring token between addresses.
 
-## Understanding the Contract
+## Understanding the Statements
 
-### State Variables
+` error insufficientFunds (uint _amountiHave, uint _amountNeeded); `
 
--  gradeCount tracks the number of grades submitted,
--  studentAddresses maps grade IDs to student addresses,
--  subjects associates grade IDs with subjects,
--  grades stores the actual grades,
--  isApproved and isRejected track the approval and rejection status of grades.
+The error revert statement throws is a custom error designed to inform the user about the amount required and amount present
 
-### Events
+` require (msg.sender == owner, "Only owner can perform this operation."); `
 
-- `event GradeApproved(uint gradeId, address student)`: Emitted when a grade is approved.
-- `event GradeRejected(uint gradeId, address student)`: Emitted when a grade is rejected.
+ require ensures that only the owner of the contract can execute functions that use this modifier. If msg.sender (the address that called the function) is not the owner, the execution is reverted with the error message "Only owner can perform this operation."
 
-### Functions
+` revert insufficientFunds(balance[_senderAddress], value); `
 
-1. `submitGrade(address student, string memory subject, uint grade) public returns(uint)`
-   It allows submitting a grade for a student in a specific subject, ensuring the grade is between 0 and 100, and returns a new grade ID; 
+ revert is used to halt the function execution if the sender's balance is less than the amount they are trying to transfer. The custom error insufficientFunds provides details about the current balance and the required amount, which can be useful for debugging and user feedback.
 
-2. `approveGrade(uint gradeId) public`
-   It approves a grade by its ID, ensuring the grade exists and hasn't been approved yet, and emits the GradeApproved event; 
+ ` assert (Count >= 1); `
+ 
+  assert is used to verify that the Count variable is always greater than or equal to 1 after incrementing. Since Count starts from 0 and is incremented by 1 at the beginning of the sendMyCoins function, this condition should always be true. If it is ever false, it indicates a serious flaw in the contract logic.
 
-3. `rejectGrade(uint gradeId) public`
-   It rejects a grade by its ID, ensuring the grade exists and hasn't been rejected yet, and emits the GradeRejected event.
-  
-     
 ## Usage
 to uses this contract or exectue you can use Remix, an online Solidity IDE. To get started, go to the Remix website at https://remix.ethereum.org/.
 
-Once you are on the Remix website, create a new file by clicking on the "+" icon in the left-hand sidebar. Save the file with a .sol extension (e.g., studentGrading.sol). Copy and paste the following code into the file:
+Once you are on the Remix website, create a new file by clicking on the "+" icon in the left-hand sidebar. Save the file with a .sol extension (e.g., error.sol). Copy and paste the following code into the file:
 
 ```solidity
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.25;
 
-contract SchoolGrading {
-    uint public gradeCount;
-    mapping(uint => address) public studentAddresses;
-    mapping(uint => string) public subjects;
-    mapping(uint => uint) public grades;
-    mapping(uint => bool) public isApproved;
-    mapping(uint => bool) public isRejected;
-    
-    event GradeApproved(uint gradeId, address student);
-    event GradeRejected(uint gradeId, address student);
-    
-    // REQUIRE FUNCTION()
-    function submitGrade(address student, string memory subject, uint grade) public returns(uint) {
-        require(grade >= 0 && grade <= 100, "Grade must be between 0 and 100");
-        gradeCount++;
-        studentAddresses[gradeCount] = student;
-        subjects[gradeCount] = subject;
-        grades[gradeCount] = grade;
-        return gradeCount;
-    }
-    
-    // ASSERT FUNCTION()
-    function approveGrade(uint gradeId) public {
-        assert(studentAddresses[gradeId] != address(0) && !isApproved[gradeId]);
-        
-        isApproved[gradeId] = true;
-        emit GradeApproved(gradeId, studentAddresses[gradeId]);
+error insufficientFunds (uint _amountiHave, uint _amountNeeded);
+event minted (uint _DepositAmount, address _forAddress);
+
+contract error
+{
+    address owner;
+    mapping (address => uint) balance;
+    uint Count = 0;
+    modifier allowOnlyOwner ()
+    {
+        require (msg.sender == owner, "Only owner can perform this operation.");
+        _;
     }
 
-    // REVERT FUNCTION()
-    function rejectGrade(uint gradeId) public {
-        if (studentAddresses[gradeId] == address(0) || isRejected[gradeId]) {
-            revert("Grade does not exist or has already been rejected");
+    constructor()
+    {
+        owner = msg.sender;
+    }
+
+    function mintFor (address _receivingAddress, uint _creditingAmount) allowOnlyOwner public 
+    {
+        balance[_receivingAddress] += _creditingAmount;
+        emit minted (_creditingAmount, _receivingAddress);
+    }
+
+    function sendMyCoins (address _senderAddress, address _receiverAddress, uint value) public
+    {
+        Count += 1;
+        if (balance[_senderAddress] < value)
+        {
+            revert insufficientFunds(balance[_senderAddress], value);
         }
-
-        isRejected[gradeId] = true;
-        emit GradeRejected(gradeId, studentAddresses[gradeId]);
+        assert (Count >= 1);
+        balance[_receiverAddress] += value;
+        balance[_senderAddress] -= value;
     }
 }
 ```
-To compile the code, click on the "Solidity Compiler" tab in the left-hand sidebar. Make sure the "Compiler" option is set to "0.8.26" (or another compatible version), and then click on the "Compile studentGrading.sol" button.
+To compile the code, click on the "Solidity Compiler" tab in the left-hand sidebar. Make sure the "Compiler" option is set to "0.8.25" (or another compatible version), and then click on the "Compile error.sol" button.
 
-Once the code is compiled, you can deploy the contract by clicking on the "Deploy " tab in the left-hand sidebar. Select the "studentGrading" contract from the dropdown menu, and then click on the "Deploy" button.
+Once the code is compiled, you can deploy the contract by clicking on the "Deploy & Run Transactions" tab in the left-hand sidebar. Select the "error" contract from the dropdown menu, and then click on the "Deploy" button.
 
-Once the contract is deployed, you can use the deployed contract interface to call the submitGrade, approveGrade and rejectGrade .You can enter addresses and values to test the functionality. After entering data, click on "transact" button to execute the function , enter the grade and do testing. 
+Once the contract is deployed, you can use the deployed contract interface to call the mint, transfer.You can enter addresses and values to test the functionality. After entering data, click on "transact" button to execute the function and mint, transfer the amount and do testing. 
 
 ## Contact
 For any questions or suggestions, feel free to open an issue or contact the repository owner.
